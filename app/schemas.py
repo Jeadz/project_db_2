@@ -41,33 +41,26 @@ class TableBase(BaseModel):
 
 class TableCreate(TableBase):
     pass
-
 class Table(TableBase):
     id: int
     class Config:
         orm_mode = True
-
 class BookingBase(BaseModel):
     id_user: int
     id_table: int
     booking_date: str
-
 class BookingCreate(BookingBase):
     pass
-
 class Booking(BookingBase):
     id: int
     class Config:
         orm_mode = True
-
 class DishOrdersBase(BaseModel):
     id_order: int
     id_dish: int
     amount: int
-
 class DishOrdersCreate(DishOrdersBase):
     pass
-
 class DishOrderss(DishOrdersBase):
     id: int
     class Config:

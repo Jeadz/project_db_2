@@ -63,3 +63,8 @@ def get_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
         return crud_users.get_users(db, skip=skip, limit=limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get users. {e}")
+    
+    
+@router.delete("/user_delete/{user_id}", response_model=dict)
+def delete_user_endpoint(user_id: int, db: Session = Depends(get_db)):
+    return crud_users.delete_user(db=db, user_id=user_id)

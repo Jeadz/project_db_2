@@ -67,8 +67,25 @@ def consult_user_by_id():
         else:
             st.error(f"Error to search the user ID: {response.status_code} - {response.text}")
 
+def delete_user_by_id():
+    st.subheader("Delete User By ID")
+    user_id = st.text_input("User ID To Delete")
+    if st.button("Delete User"):
+        if user_id:
+            response = requests.delete(f"{API_BASE_URL}/users/user_delete/{user_id}")
+            
+            if response.status_code == 200:
+                st.success(response.json().get("message"))
+            elif response.status_code == 404:
+                st.error("User Not Found")
+            else:
+                st.error("ERROR Trying User Delete")
+        else:
+            st.warning("Please, Input A Valid ID User")
+        
 
 create_user_bulk()
 create_user()
 consult_user_by_id()
 consult_all_users()
+delete_user_by_id()
