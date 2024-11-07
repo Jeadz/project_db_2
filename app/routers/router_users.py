@@ -18,7 +18,14 @@ def get_db():
         yield db
     finally:
         db.close()
-
+        
+@router.post("/", response_model=schemas.User)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    try:
+        return crud_users.create_user(db=db, user=user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create user. {e}")
+    
 @router.post("/upload_excel/")
 async def upload_users_excel(file: UploadFile = File(...), db: Session = Depends(get_db)):
     if not (file.filename.endswith(".xlsx") or file.filename.endswith(".xls")):
@@ -29,28 +36,21 @@ async def upload_users_excel(file: UploadFile = File(...), db: Session = Depends
     try:
         df = pd.read_excel(BytesIO(file_content))
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al procesar el archivo Excel: {e}")
+        raise HTTPException(status_code=400, detail=f"Error while prosesing Excel File : {e}")
 
     required_columns = {'fullname', 'email'}
     if not required_columns.issubset(df.columns):
-        raise HTTPException(status_code=400, detail="El archivo Excel debe contener las columnas 'fullname' y 'email'")
+        raise HTTPException(status_code=400, detail="Invalid Excel file. missing required columns:  'fullname' and 'email'")
 
     users_data = df.to_dict(orient="records")
 
     result = crud_users.create_user_bulk(db, users_data)
     return {"message": "Users created successfully", "result": result}
 
-@router.post("/", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    try:
-        return crud_users.create_user(db=db, user=user)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create user. {e}")
-
 @router.get("/{user_id}", response_model=schemas.User)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     try:
-        db_user = crud_users.get_user(db, user_id=user_id)
+        db_user = crud_users.get_user_by_id(db, user_id=user_id)
         if db_user is None:
             raise HTTPException(status_code=404, detail="user not found")
         return db_user
@@ -58,12 +58,11 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Failed to get user. {e}")
 
 @router.get("/", response_model=List[schemas.User])
-def get_users(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def get_users_all(db: Session = Depends(get_db)):
     try:
-        return crud_users.get_users(db, skip=skip, limit=limit)
+        return crud_users.get_users_all(db)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get users. {e}")
-    
     
 @router.delete("/user_delete/{user_id}", response_model=dict)
 def delete_user_endpoint(user_id: int, db: Session = Depends(get_db)):
