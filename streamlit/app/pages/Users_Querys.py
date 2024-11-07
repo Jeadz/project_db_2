@@ -3,9 +3,8 @@ import requests
  
 API_BASE_URL = "http://localhost:8000/" 
 
-
 def create_user_bulk():
-    st.subheader("Bulk Users Load")
+    st.subheader("Load Bulk Users")
     uploaded_file = st.file_uploader("Load Excel File", type=["xlsx", "xls"])
     
     if uploaded_file is not None:
@@ -20,10 +19,10 @@ def create_user_bulk():
             if response.status_code == 200:
                 st.success(response.json()["message"])
             else:
-                st.error(f"Error: {response.json().get('detail', 'An error occurred')}")
+                st.error(f"Error: {response.json().get('detail', 'An error has occurred')}")
 
 def create_user():
-    st.subheader("Create User")
+    st.subheader("Create User:")
     with st.form(key='user_form'):
         fullname = st.text_input("User full name")
         email = st.text_input("User email")
@@ -39,14 +38,14 @@ def create_user():
             response = requests.post(f"{API_BASE_URL}users", json=new_user)
             
             if response.status_code in [200, 201]:
-                st.success('User create successfully')
+                st.success('User Create Successfully')
             else:
-                st.error(f"Error al crear el usuario: {response.status_code} - {response.text}")
+                st.error(f"Error While Tried Create An User: {response.status_code} - {response.text}")
 
 def consult_all_users():
     st.subheader("List All Users")
     if st.button("Show All Users"):
-        response = requests.get(f"{API_BASE_URL}/users/")
+        response = requests.get(f"{API_BASE_URL}users/")
         if response.status_code == 200:
             users = response.json()
             st.write("Users:", users)
@@ -57,7 +56,7 @@ def consult_user_by_id():
     st.subheader("Search User By ID")
     user_id = st.number_input("Enter the User ID to consult", min_value=1)
     if st.button("Search User"):
-        response = requests.get(f"{API_BASE_URL}/users/{user_id}")
+        response = requests.get(f"{API_BASE_URL}users/{user_id}")
         if response.status_code == 200:
             user = response.json()
             if user:
