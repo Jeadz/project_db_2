@@ -47,6 +47,19 @@ async def upload_users_excel(file: UploadFile = File(...), db: Session = Depends
     result = crud_users.create_user_bulk(db, users_data)
     return {"message": "Users created successfully", "result": result}
 
+@router.delete("/user_delete/{user_id}", response_model=dict)
+def delete_user_endpoint(user_id: int, db: Session = Depends(get_db)):
+    return crud_users.delete_user(db=db, user_id=user_id)
+
+@router.put("/update_user/{user_id}", response_model=schemas.User)
+def update_user(user_id: int, user_data: schemas.UserUpdate, db: Session = Depends(get_db)):
+    try:
+        return crud_users.update_user(db=db, user_id=user_id, user_data=user_data)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update user. {e}")
+
 @router.get("/{user_id}", response_model=schemas.User)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     try:
@@ -64,6 +77,3 @@ def get_users_all(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get users. {e}")
     
-@router.delete("/user_delete/{user_id}", response_model=dict)
-def delete_user_endpoint(user_id: int, db: Session = Depends(get_db)):
-    return crud_users.delete_user(db=db, user_id=user_id)

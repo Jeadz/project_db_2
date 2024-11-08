@@ -44,3 +44,16 @@ async def upload_tables_excel(file: UploadFile = File(...), db: Session = Depend
     tables_data = df.to_dict(orient="records")
     result = crud_tables.create_table_bulk(db, tables_data)
     return {"message": "Tables created successfully", "result": result}
+
+@router.delete("/delete_table/{table_id}", response_model=dict)
+def delete_table_endpoint(table_id: int, db: Session = Depends(get_db)):
+    return crud_tables.delete_table(db=db, table_id=table_id)
+
+@router.put("/update_table/{table_id}", response_model=schemas.Table)
+def update_table(table_id: int, table_data: schemas.TableUpdate, db: Session = Depends(get_db)):
+    try:
+        return crud_tables.update_table(db=db, table_id=table_id, table_data=table_data)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid table data: {e}")
